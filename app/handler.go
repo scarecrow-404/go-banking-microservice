@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/scarecrow-404/banking/service"
 )
 
@@ -31,7 +32,18 @@ func (ch *CustomerHandlers)getAllCustomer(w http.ResponseWriter, r *http.Request
 	}
 
 }
-
+func (ch *CustomerHandlers) getCustomer(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["customer_id"]
+	customer,err:=ch.service.GetCustomer(id)
+	if  err != nil {
+		w.WriteHeader(err.Code)
+		fmt.Fprintf(w,err.Message)
+	}else{
+		w.Header().Add("Content-Type", "appication/json")
+		json.NewEncoder(w).Encode(customer)
+	}
+}
 
 
 func createCustomer(w http.ResponseWriter, r *http.Request){

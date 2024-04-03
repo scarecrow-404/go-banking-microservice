@@ -1,5 +1,7 @@
 package domain
 
+import "github.com/scarecrow-404/banking/errs"
+
 type Customer struct {
 	Id          string
 	Name        string
@@ -9,9 +11,7 @@ type Customer struct {
 	Status      string
 }
 
-
-type CustomerRepository interface{
-	FindAll() ([]Customer,error)
-	
+type CustomerRepository interface {
+	FindAll() ([]Customer, error)
+	ById(string) (*Customer, *errs.AppError)
 }
-
