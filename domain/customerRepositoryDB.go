@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/scarecrow-404/banking/errs"
+	"github.com/scarecrow-404/banking/logger"
 )
 const (
     host     = "localhost"
@@ -33,14 +34,14 @@ func (d CustomerRepositoryDb) FindAll(status string) ([]Customer, *errs.AppError
 		rows, err =  d.db.Query(FindAllSql,status)
 	}
 	if err != nil{
-			log.Println("Error while querying customers:",err.Error())
+		logger.Error("Error while querying customers:"+err.Error())
 			return nil, errs.NewUnexpectedError ("unexpected database error")
 	}
 	for rows.Next(){
 		var c Customer
 		err :=rows.Scan(&c.Id,&c.Name,&c.City,&c.Zipcode,&c.DateofBirth,&c.Status)
 		if err != nil {
-			log.Println("Error while scaning customers:",err.Error())
+			logger.Error("Error while scaning customers:"+err.Error())
 			return nil ,errs.NewUnexpectedError("Error while scaning customers")
 		}
 		customers = append(customers,c)
@@ -65,7 +66,7 @@ func (d  CustomerRepositoryDb) ById(id string)( *Customer,*errs.AppError){
 		if err == sql.ErrNoRows{
 			return nil, errs.NewNotFoundError("customer not found")
 		}else{
-			log.Println("Error while scaning customer:",err.Error())
+			logger.Error("Error while scaning customer:"+err.Error())
 		return nil,errs.NewUnexpectedError("unexpected database error")
 		}
 		
