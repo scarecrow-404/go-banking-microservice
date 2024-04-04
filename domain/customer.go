@@ -3,11 +3,11 @@ package domain
 import "github.com/scarecrow-404/banking/errs"
 
 type Customer struct {
-	Id          string
-	Name        string
+	Id          string `db:"customer_id"`
+	Name        string 
 	City        string
 	Zipcode     string
-	DateofBirth string
+	DateofBirth string  `db:"date_of_birth"`
 	Status      string
 }
 
