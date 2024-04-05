@@ -3,6 +3,7 @@ package domain
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -10,13 +11,7 @@ import (
 	"github.com/scarecrow-404/banking/errs"
 	"github.com/scarecrow-404/banking/logger"
 )
-const (
-    host     = "localhost"
-    port     = 5432
-	user     = "Secret"
-    password = "My_Own_Password"
-    dbname   = "for testing only"
-)
+
 type CustomerRepositoryDb struct {
 	db *sqlx.DB
 }
@@ -61,10 +56,15 @@ func (d  CustomerRepositoryDb) ById(id string)( *Customer,*errs.AppError){
 }
 
 
-
-
 func NewCustomerRepositoryDb() CustomerRepositoryDb{
-	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	host     := os.Getenv("DB_HOST")
+    port     := os.Getenv("DB_PORT")
+	user     := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWD")
+	dbname   := os.Getenv("DB_NAME")
+
+
+	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	
     db, err := sqlx.Open("postgres", psqlconn)
 	db.SetConnMaxLifetime(time.Minute *3)
