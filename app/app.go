@@ -5,8 +5,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/scarecrow-404/banking/domain"
 	"github.com/scarecrow-404/banking/logger"
@@ -32,12 +34,15 @@ func Start() {
 
 	//wiring
 	// ch:=CustomerHandlers{service:  service.NewCustomerService(domain.NewCustomerRepositoryStub())}
-	ch:=CustomerHandlers{service:  service.NewCustomerService(domain.NewCustomerRepositoryDb())}
-
+	dbClient:= getDbClient()
+	customerRepositoryDb := domain.NewCustomerRepositoryDb(dbClient)
+	accountRepositoryDb := domain.NewAccountREpositoryDB(dbClient)
+	ch:=CustomerHandlers{service:  service.NewCustomerService(customerRepositoryDb)}
+	ah := AccountHandler{service: service.NewAccountService(accountRepositoryDb)}
 	//define Routes
 	router.HandleFunc("/customers", ch.getAllCustomer).Methods(http.MethodGet)
 	router.HandleFunc("/customers/{customer_id:[0-9]+}", ch.getCustomer).Methods(http.MethodGet)
-	// router.HandleFunc("/customers?status={status}", ch.getCustomerByStatus).Methods(http.MethodGet)
+	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.NewAccount).Methods(http.MethodPost)
 	//starting server
 	address:=os.Getenv("SERVER_ADDRESS")
 	port:= os.Getenv("SERVER_PORT")
@@ -46,3 +51,24 @@ func Start() {
 	log.Fatal(http.ListenAndServe(addressPort, router))
 	
 }
+
+func getDbClient() *sqlx.DB{
+	host     := os.Getenv("DB_HOST")
+    port     := os.Getenv("DB_PORT")
+	user     := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWD")
+	dbname   := os.Getenv("DB_NAME")
+
+
+	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	
+    db, err := sqlx.Open("postgres", psqlconn)
+	if err !=nil{
+		panic(err)
+	}
+	db.SetConnMaxLifetime(time.Minute *3)
+	db.SetMaxOpenConns(20)
+	db.SetMaxIdleConns(20)
+	return db
+}
+
