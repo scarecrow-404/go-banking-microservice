@@ -50,15 +50,8 @@ func (h AccountHandler) MakeTransaction(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	request.AccountId = accountId
-	if err!= nil {
-		writeResponse(w, http.StatusBadRequest, "invalid account id")
-		return
-	}
 	request.CustomerId= customerId
-	if err!= nil {
-		writeResponse(w, http.StatusBadRequest, "invalid customer id")
-		return
-	}
+	
 	response, appError := h.service.MakeTransaction(request)
 	if appError!= nil {
 		writeResponse(w, appError.Code, appError.AsMessage())
