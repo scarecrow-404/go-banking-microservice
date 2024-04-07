@@ -33,7 +33,6 @@ func Start() {
 	router := mux.NewRouter()
 
 	//wiring
-	// ch:=CustomerHandlers{service:  service.NewCustomerService(domain.NewCustomerRepositoryStub())}
 	dbClient:= getDbClient()
 	customerRepositoryDb := domain.NewCustomerRepositoryDb(dbClient)
 	accountRepositoryDb := domain.NewAccountREpositoryDB(dbClient)
@@ -43,6 +42,7 @@ func Start() {
 	router.HandleFunc("/customers", ch.getAllCustomer).Methods(http.MethodGet)
 	router.HandleFunc("/customers/{customer_id:[0-9]+}", ch.getCustomer).Methods(http.MethodGet)
 	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.NewAccount).Methods(http.MethodPost)
+	router.HandleFunc("/customers/{customer_id:[0-9]+}/account/{account_id:[0-9]+}", ah.MakeTransaction).Methods(http.MethodPost)
 	//starting server
 	address:=os.Getenv("SERVER_ADDRESS")
 	port:= os.Getenv("SERVER_PORT")
